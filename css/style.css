@@ -1,4 +1,3 @@
-
 html, body {
     padding: 0;
     margin: 0;
@@ -22,44 +21,27 @@ html, body {
 body {
     font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif;
     font-size: 20px;
+    line-height: 1.45;
     color: #eee;
     background: #222;
-    margin: 0;
+    margin: 0px 0px 0px 0px;
+}
+
+#body_writeup {
+    font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    font-size: 20px;
+    line-height: 1.45;
+    color: #eee;
+    background: #222;
+    margin: 30px 30px 30px 30px;
 }
 
 #main_div {
     margin: 0 auto;
     max-width: 55em;
-    
-    position: absolute;
-}
-#title_div {
     padding: 30px;
     position: absolute;
-    z-index: 100;
 }
-#index-div {
-    margin:80px 200px 0px 200px;
-    max-width:900px;
-    text-align: center;
-    align: center;
-}
-#index-table td {
-    align: center;
-    border: 10px solid #222;
-    height:500px; 
-    width: 280px; 
-    vertical-align: top;
-}
-img.demoplot {
-    max-width: 220px;
-    max-height: 220px;
-}
-img {
-    max-width: 640px;
-    margin-left: 30px;
-}
-
 
 .top {
     margin: 30px;

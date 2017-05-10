@@ -36,7 +36,9 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 	// internals
 
-	this.target = new THREE.Vector3();
+	// this.target = new THREE.Vector3();
+	this.target = Renderer.cameraLookAtVector.clone(); // hacky way to restore the target
+
 
 	var EPS = 0.000001;
 
@@ -92,7 +94,6 @@ THREE.TrackballControls = function ( object, domElement ) {
 			this.screen.top = box.top + window.pageYOffset - d.clientTop;
 			this.screen.width = box.width;
 			this.screen.height = box.height;
-
 		}
 
 	};
@@ -115,7 +116,9 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 			vector.set(
 				( pageX - _this.screen.left ) / _this.screen.width,
-				( pageY - _this.screen.top ) / _this.screen.height
+				// ( pageY - _this.screen.top ) / _this.screen.height
+				( _this.screen.height - pageY ) / _this.screen.height //linguang's dirty hack to invert y-axis behavior...
+
 			);
 
 			return vector;
@@ -134,7 +137,8 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 			mouseOnBall.set(
 				( pageX - _this.screen.width * 0.5 - _this.screen.left ) / (_this.screen.width*.5),
-				( _this.screen.height * 0.5 + _this.screen.top - pageY ) / (_this.screen.height*.5),
+				// ( _this.screen.height * 0.5 + _this.screen.top - pageY ) / (_this.screen.height*.5),
+				( pageY - _this.screen.height * 0.5 - _this.screen.top ) / (_this.screen.height*.5), //linguang's dirty hack to invert y-axis behavior...
 				0.0
 			);
 
@@ -149,7 +153,7 @@ THREE.TrackballControls = function ( object, domElement ) {
 				} else {
 
 					mouseOnBall.z = .5 / length;
-					
+
 				}
 
 			} else if ( length > 1.0 ) {
