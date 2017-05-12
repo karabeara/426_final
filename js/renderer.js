@@ -166,7 +166,7 @@ Renderer.getPhongMaterial = function(uv_here, material) {
   }
 
   phongMaterial.shininess = Reflection.shininess;
-
+  
   return phongMaterial;
 };
 
@@ -396,7 +396,7 @@ Renderer.drawTrianglePhong = function(verts, projectedVerts, normals, uvs, mater
 				
 				var z = projectedVerts[0].z * triCoords[0] + projectedVerts[1].z * triCoords[1] + projectedVerts[2].z * triCoords[2];
 				if (z < this.zBuffer[x][y]) {
-					this.zBuffer[x][y] = z;
+					//check alpha value here!!
 						
 					var v0 = ((new THREE.Vector3()).copy(verts[0])).multiplyScalar(triCoords[0]);
 					var v1 = ((new THREE.Vector3()).copy(verts[1])).multiplyScalar(triCoords[1]);
@@ -407,6 +407,8 @@ Renderer.drawTrianglePhong = function(verts, projectedVerts, normals, uvs, mater
 					
 					var n;
 					
+					var isTransparent = false;
+					
 					var color;
 					if (uvs !== undefined) {
 						var uv = {};
@@ -414,22 +416,27 @@ Renderer.drawTrianglePhong = function(verts, projectedVerts, normals, uvs, mater
 						uv.y = uvs[0].y*triCoords[0]+uvs[1].y*triCoords[1]+uvs[2].y*triCoords[2];
 						var newPhongMaterial = Renderer.getPhongMaterial(uv, material);
 
-						if (material.xyzNormal != undefined && material.xyzNormal.width > 1) {
-							var rgb = material.xyzNormal.getPixel(Math.floor(uv.x * (material.xyzNormal.width-1)), Math.floor(uv.y * (material.xyzNormal.height-1)));
-
-							var xVal = 2 * rgb.r - 1;
-							var yVal = 2 * rgb.g - 1;
-							var zVal = 2 * rgb.b - 1;
-
-							n = new THREE.Vector3(xVal, yVal, zVal);
-							n.normalize();
+						if (newPhongMaterial.diffuse.a == 0) {
+							isTransparent = true;
 						} else {
-							var n0 = ((new THREE.Vector3()).copy(normals[0])).multiplyScalar(triCoords[0]);
-							var n1 = ((new THREE.Vector3()).copy(normals[1])).multiplyScalar(triCoords[1]);
-							var n2 = ((new THREE.Vector3()).copy(normals[2])).multiplyScalar(triCoords[2]);
-							n = n0.add(n1).add(n2);
+						
+							if (material.xyzNormal != undefined && material.xyzNormal.width > 1) {
+								var rgb = material.xyzNormal.getPixel(Math.floor(uv.x * (material.xyzNormal.width-1)), Math.floor(uv.y * (material.xyzNormal.height-1)));
+
+								var xVal = 2 * rgb.r - 1;
+								var yVal = 2 * rgb.g - 1;
+								var zVal = 2 * rgb.b - 1;
+
+								n = new THREE.Vector3(xVal, yVal, zVal);
+								n.normalize();
+							} else {
+								var n0 = ((new THREE.Vector3()).copy(normals[0])).multiplyScalar(triCoords[0]);
+								var n1 = ((new THREE.Vector3()).copy(normals[1])).multiplyScalar(triCoords[1]);
+								var n2 = ((new THREE.Vector3()).copy(normals[2])).multiplyScalar(triCoords[2]);
+								n = n0.add(n1).add(n2);
+							}
+							color = Reflection.phongReflectionModel(v, view, n, this.lightPos, newPhongMaterial);
 						}
-						color = Reflection.phongReflectionModel(v, view, n, this.lightPos, newPhongMaterial);
 					} else {
 						var n0 = ((new THREE.Vector3()).copy(normals[0])).multiplyScalar(triCoords[0]);
 						var n1 = ((new THREE.Vector3()).copy(normals[1])).multiplyScalar(triCoords[1]);
@@ -437,7 +444,11 @@ Renderer.drawTrianglePhong = function(verts, projectedVerts, normals, uvs, mater
 						n = n0.add(n1).add(n2);
 						color = Reflection.phongReflectionModel(v, view, n, this.lightPos, phongMaterial);
 					}
-					this.buffer.setPixel(x, y, color);
+					
+					if (!isTransparent) {
+						this.zBuffer[x][y] = z;
+						this.buffer.setPixel(x, y, color);
+					}
 				}
 			} else if (seen) {
 				break; 
