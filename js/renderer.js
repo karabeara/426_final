@@ -417,7 +417,7 @@ Renderer.drawTrianglePhong = function(verts, projectedVerts, normals, uvs, mater
 						uv.y = uvs[0].y*triCoords[0]+uvs[1].y*triCoords[1]+uvs[2].y*triCoords[2];
 						var newPhongMaterial = Renderer.getPhongMaterial(uv, material);
 
-						if (newPhongMaterial.specular.r <= 0.1) {
+						if (newPhongMaterial.specular.r == 0) {
 							isTransparent = true;
 						} else {
 						
