@@ -16,6 +16,7 @@ Reflection.phongReflectionModel = function(vertex, view, normal, lightPos, phong
   var ndotl = normal.dot(light_dir);
   color.plus(phongMaterial.diffuse.copy().multipliedBy(ndotl));
 
+  /* no specular
   var r = light_dir.reflect(normal);
   var v = view.normalize();
   var vdotr = -r.dot(v);
@@ -23,7 +24,7 @@ Reflection.phongReflectionModel = function(vertex, view, normal, lightPos, phong
   if (vdotr > 1) vdotr = 1;
   var v = Math.pow(vdotr,phongMaterial.shininess);
   var spec = (phongMaterial.specular.copy()).multipliedBy(v);
-  color.plus(spec);
+  color.plus(spec); */
 
    color.plus(phongMaterial.ambient);
   // ----------- STUDENT CODE BEGIN ------------
@@ -416,7 +417,7 @@ Renderer.drawTrianglePhong = function(verts, projectedVerts, normals, uvs, mater
 						uv.y = uvs[0].y*triCoords[0]+uvs[1].y*triCoords[1]+uvs[2].y*triCoords[2];
 						var newPhongMaterial = Renderer.getPhongMaterial(uv, material);
 
-						if (newPhongMaterial.diffuse.a == 0) {
+						if (newPhongMaterial.specular.r <= 0.1) {
 							isTransparent = true;
 						} else {
 						
