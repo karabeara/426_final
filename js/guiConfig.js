@@ -18,7 +18,8 @@ GuiConfig.meshFileNames = [
   'boggieeyes.obj',
   'boggiebody.obj',
   'diablo.obj',
-  'torus.obj'
+  'torus.obj',
+  'plane.obj'
 ];
 
 GuiConfig.resolutionOptions = ['320x240', '640x480', '800x600'];
