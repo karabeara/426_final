@@ -5,6 +5,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 
+
     <script src="libjs/three.min.js"></script>
 
 		<!-- <script src="vendor/three.js/Three.js"></script>
@@ -35,13 +36,44 @@
 	</div>
 
 	<!-- Adapted from https://pxwise.github.io/2015/05/31/Getting-Started-with-THREE.js.html -->
+
+	<script id="vertexShader" type="x-shader/x-vertex">
+	uniform float time;
+	void main()	{
+		gl_Position = projectionMatrix *
+                modelViewMatrix *
+                vec4(position,1.0);
+	}
+</script>
+
+<script id="fragmentShader" type="x-shader/x-fragment">
+	uniform float time;
+	void main() {
+  gl_FragColor = vec4(1.0,  // R
+                      1.0,  // G
+                      1.0,  // B
+                      1.0); // A
+}
+</script>
+
   <script>
   (function() {
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
     var renderer = new THREE.WebGLRenderer();
     var geometry = new THREE.BoxGeometry(700, 700, 700, 10, 10, 10);
-    var material = new THREE.MeshBasicMaterial({color: 0xfffff, wireframe: true});
+    var startTime = Date.now();
+    uniforms = {
+			time: { type: "f", value: 1.0 },
+		};
+    var material = new THREE.ShaderMaterial( {
+			uniforms: uniforms,
+			vertexShader: document.getElementById( 'vertexShader' ).textContent,
+			fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+		});
+    //var material = new THREE.MeshBasicMaterial({color: 0xfffff});
+
+    console.log(material)
     var cube = new THREE.Mesh(geometry, material);
 
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -51,8 +83,11 @@
 
     function render() {
       requestAnimationFrame(render);
-      cube.rotation.x += 0.01;
-      cube.rotation.y += 0.01;
+      cube.rotation.x += 0.001;
+      cube.rotation.y += 0.001;
+      var elapsedMilliseconds = Date.now() - startTime;
+		var elapsedSeconds = elapsedMilliseconds / 1000.;
+		uniforms.time.value = 60. * elapsedSeconds;
       renderer.render(scene, camera);
     };
 
