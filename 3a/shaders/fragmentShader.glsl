@@ -754,7 +754,7 @@ vec3 getLightContribution( Light light, Material mat, vec3 posIntersection, vec3
    float pointShadowRatio = pointShadowRatio( posIntersection, lightVector, light.position ) ;
 
     // For hard shadows
-    // if ( pointInShadow( posIntersection, lightVector ) ) { return vec3( 0.0, 0.0, 0.0 ); }
+    if ( pointInShadow( posIntersection, lightVector ) ) { return vec3( 0.0, 0.0, 0.0 ); }
 
     if ( mat.materialType == PHONGMATERIAL || mat.materialType == LAMBERTMATERIAL ) {
         vec3 contribution = vec3( 0.0, 0.0, 0.0 );
@@ -788,10 +788,12 @@ vec3 getLightContribution( Light light, Material mat, vec3 posIntersection, vec3
             contribution += phongTerm;
         }
 
-        return contribution * pointShadowRatio;
+        // return contribution * pointShadowRatio;
+        return contribution;
     }
     else {
-        return diffuseColor * pointShadowRatio;
+        // return diffuseColor * pointShadowRatio;
+        return diffuseColor;
     }
 
 }
@@ -889,5 +891,5 @@ void main( ) {
     vec3 res = traceRay( ray );
 
     // paint the resulting color into this pixel
-    gl_FragColor = vec4( res.x, res.y, res.z, 0.2 );
+    gl_FragColor = vec4( res.x, res.y, res.z, 1.0 );
 }
