@@ -4,23 +4,24 @@
 		<title>learningthree.js boiler plate for three.js</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		
-			
-		<script src="vendor/three.js/Three.js"></script>
+
+    <script src="libjs/three.min.js"></script>
+
+		<!-- <script src="vendor/three.js/Three.js"></script>
 		<script src="vendor/three.js/Detector.js"></script>
-		<!-- https://github.com/mrdoob/stats.js -->
 		<script src="vendor/three.js/Stats.js"></script>
 
 		<script src="vendor/threex/THREEx.screenshot.js"></script>
 		<script src="vendor/threex/THREEx.FullScreen.js"></script>
 		<script src="vendor/threex/THREEx.WindowResize.js"></script>
-		<script src="vendor/threex.dragpancontrols.js"></script>
+
+		<script src="vendor/threex.dragpancontrols.js"></script> -->
 
 		<link  href="css/main.css" rel="stylesheet"/>
 	</head>
 <body>
 	<!-- three.js container -->
-    	<div id="container"></div>
+  <div id="container"></div>
 	<!-- info on screen display -->
 	<div id="info">
 		<div class="top">
@@ -30,10 +31,35 @@
 		</div>
 		<div class="bottom" id="inlineDoc" >
 			- <i>p</i> for screenshot
-		</div> 
-	</div> 
+		</div>
+	</div>
 
-	<script type="text/javascript">
+  <script>
+  (function() {
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+    var renderer = new THREE.WebGLRenderer();
+    var geometry = new THREE.BoxGeometry(700, 700, 700, 10, 10, 10);
+    var material = new THREE.MeshBasicMaterial({color: 0xfffff, wireframe: true});
+    var cube = new THREE.Mesh(geometry, material);
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+    scene.add(cube);
+    camera.position.z = 1000;
+
+    function render() {
+      requestAnimationFrame(render);
+      cube.rotation.x += 0.01;
+      cube.rotation.y += 0.01;
+      renderer.render(scene, camera);
+    };
+
+    render();
+  }());
+  </script>
+
+	<!-- <script type="text/javascript">
 		var stats, scene, renderer;
 		var camera, cameraControl;
 
@@ -43,10 +69,8 @@
 		// init the scene
 		function init(){
 
-			
-			
 			renderer = new THREE.CanvasRenderer();
-			
+
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			document.getElementById('container').appendChild(renderer.domElement);
 
@@ -73,16 +97,18 @@
 			THREEx.Screenshot.bindKey(renderer);
 			// allow 'f' to go fullscreen where this feature is supported
 			if( THREEx.FullScreen.available() ){
-				THREEx.FullScreen.bindKey();		
+				THREEx.FullScreen.bindKey();
 				document.getElementById('inlineDoc').innerHTML	+= "- <i>f</i> for fullscreen";
 			}
 
 			// here you add your objects
 			// - you will most likely replace this part by your own
 			var geometry	= new THREE.TorusGeometry( 1, 0.42 );
-			var material	= new THREE.MeshBasicMaterial({color: 0x00ff00});
+			var material	= new THREE.MeshBasicMaterial({color: 0x00aaaa});
 			var mesh	= new THREE.Mesh( geometry, material );
 			scene.add( mesh );
+
+
 		}
 
 		// animation loop
@@ -109,6 +135,9 @@
 			// actually render the scene
 			renderer.render( scene, camera );
 		}
-	</script>
+	</script> -->
+
+
+
 </body>
 </html>
