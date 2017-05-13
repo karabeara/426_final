@@ -18,6 +18,7 @@ precision mediump int;
 #define NONE 0
 #define CHECKERBOARD 1
 #define MYSPECIAL 2
+#define FUR 3
 
 // define material types
 #define BASICMATERIAL 1
@@ -656,9 +657,8 @@ float findIntersectionWithCone( Ray ray, vec3 center, vec3 apex, float radius, o
 #define MAX_RECURSION 8
 
 vec3 calculateSpecialDiffuseColor( Material mat, vec3 posIntersection, vec3 normalVector ) {
-    // ----------- STUDENT CODE BEGIN ------------
+
     if ( mat.special == CHECKERBOARD ) {
-        // do something here for checkerboard
         vec3 zAxis = vec3(0.0, 0.0, 1.0);
         vec3 normalizedAxis = cross(normalVector, zAxis);
         float angle = acos( dot(normalizedAxis, normalVector) );
@@ -676,13 +676,39 @@ vec3 calculateSpecialDiffuseColor( Material mat, vec3 posIntersection, vec3 norm
 
         if (isEven) { return blackColor; }
         else        { return whiteColor; }
-        // ----------- Our reference solution uses 21 lines of code.
     }
-    else if ( mat.special == MYSPECIAL ) {
-        // do something here for myspecial
-        return snoise( posIntersection ) * mat.color;
 
-        // ----------- Our reference solution uses 2 lines of code.
+    else if ( mat.special == MYSPECIAL ) {
+        return snoise( posIntersection ) * mat.color;
+    }
+
+    else if ( mat.special == FUR ) {
+
+      float furDensity = 5.0;
+
+      vec3 zAxis = vec3(0.0, 0.0, 1.0);
+      vec3 normalizedAxis = cross(normalVector, zAxis);
+      float angle = acos( dot(normalizedAxis, normalVector) );
+      mat4 rotationMatrix = rotationMatrix(normalizedAxis, angle);
+
+      vec4 oldCoordinates = vec4(posIntersection, 0.0);
+      vec4 newCoordinates = oldCoordinates * rotationMatrix;
+      float x = floor(newCoordinates.x);
+      float y = floor(newCoordinates.y);
+      float total = x + y;
+      bool isEven = mod(total, 2.0 * furDensity) < EPS;
+
+      vec3 blackColor = 0.5 * mat.color;
+      vec3 whiteColor = 1.0 * mat.color;
+
+      if (isEven) { return blackColor; }
+      else        { return whiteColor; }
+
+        // for ( int i = 0; i < furDensity; i++ ) {
+        //     float x = ;
+        //     float y = ;
+        //     outputColor += getLightContribution( lights[i], mat, posIntersection, normalVector, eyeVector, phongOnly, diffuseColor );
+        // }
     }
 
     return mat.color; // special materials not implemented. just return material color.
@@ -856,12 +882,12 @@ void main( ) {
     vec3 direction = vec3( v_position.x * cameraFOV * width/height, v_position.y * cameraFOV, 1.0 );
 
     Ray ray;
-      ray.origin    = vec3( uMVMatrix * vec4( camera, 1.0 ) );
+    ray.origin    = vec3( uMVMatrix * vec4( camera, 1.0 ) );
     ray.direction = normalize( vec3( uMVMatrix * vec4( direction, 0.0 ) ) );
 
     // trace the ray for this pixel
     vec3 res = traceRay( ray );
 
     // paint the resulting color into this pixel
-    gl_FragColor = vec4( res.x, res.y, res.z, 1.0 );
+    gl_FragColor = vec4( res.x, res.y, res.z, 0.2 );
 }

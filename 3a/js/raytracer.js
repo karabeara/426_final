@@ -12,6 +12,7 @@ Raytracer.LAMBERTMATERIAL = 3;
 Raytracer.NONE         = 0;
 Raytracer.CHECKERBOARD = 1;
 Raytracer.MYSPECIAL    = 2;
+Raytracer.FUR    			 = 3;
 
 // reflect types - how to bounce rays
 Raytracer.NONEREFLECT   = 1;
@@ -51,7 +52,7 @@ Raytracer.handleMouseMove = function(event) {
 	var deltaX = newX - Raytracer.lastMouseX
 	var deltaY = newY - Raytracer.lastMouseY;
     var moved  = deltaX != 0 || deltaY != 0;
-    
+
 	if (!Raytracer.mouseDown || !moved) {
 		return;
 	}
@@ -72,10 +73,10 @@ Raytracer.initShader = function ( program, shaderType, src, debug) {
     var shader = this.gl.createShader( shaderType );
     this.gl.shaderSource(shader, src);
     this.gl.compileShader(shader);
-    
+
     // check compile status and report error
     var ok = this.gl.getShaderParameter( shader, this.gl.COMPILE_STATUS );
-    
+
     if (debug || !ok) {
         var log = this.gl.getShaderInfoLog( shader );
         var msg = debug ? 'Debug status of ' : 'Compile error in ';
@@ -95,13 +96,13 @@ Raytracer.init = function (height, width, debug) {
 
     this.gl.viewportWidth = canvas.width;
     this.gl.viewportHeight = canvas.height;
-    
+
 	this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
-    
+
     this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
-    
+
     var fSrcBase = Parser.parseTxt( 'shaders/fragmentShader.glsl' );
     var vSrc = Parser.parseTxt( 'shaders/vertexShader.glsl' );
     var fSrc = fSrcBase + Scene.getIntersectFunction();
@@ -115,10 +116,10 @@ Raytracer.init = function (height, width, debug) {
 
     var compileTime = Math.round( performance.now() - compileStartTime );
     // console.log('shader compilation completed in ' + compileTime + ' ms.');
-	
-    this.gl.linkProgram(this.program);	
+
+    this.gl.linkProgram(this.program);
     this.gl.useProgram(this.program);
-    
+
     this.gl.uniform1f( this.gl.getUniformLocation(this.program,"width" ), width  );
     this.gl.uniform1f( this.gl.getUniformLocation(this.program,"height"), height );
 
@@ -126,22 +127,22 @@ Raytracer.init = function (height, width, debug) {
     this.gl.enableVertexAttribArray(positionLocation);
 
     var bufferGeom = new Float32Array([
-        -1.0, -1.0, 
-         1.0, -1.0, 
-        -1.0,  1.0, 
-        -1.0,  1.0, 
-         1.0, -1.0, 
+        -1.0, -1.0,
+         1.0, -1.0,
+        -1.0,  1.0,
+        -1.0,  1.0,
+         1.0, -1.0,
          1.0,  1.0]);
     var buffer = this.gl.createBuffer();
     buffer.itemSize = 2;
-    buffer.numItems = 6;	
-    
+    buffer.numItems = 6;
+
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
     this.gl.bufferData(this.gl.ARRAY_BUFFER, bufferGeom, this.gl.STATIC_DRAW);
     this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
 
     this.gl.uniform1i( this.gl.getUniformLocation(this.program,"frame"), this.frame );
-	
+
 	Raytracer.RotationMatrix = mat4.create();
 	mat4.identity(Raytracer.RotationMatrix);
 
@@ -152,14 +153,14 @@ Raytracer.init = function (height, width, debug) {
 
 Raytracer.setCamera = function(cameraAngle) {
 
-    console.log("DHFGS");
-    //rotation matrix
+  console.log("DHFGS");
+  // rotation matrix
 	var newRotationMatrix = mat4.create();
 	mat4.identity(newRotationMatrix);
-    mat4.rotate(newRotationMatrix, cameraAngle[0] * Math.PI, [1, 0, 0]);
+  mat4.rotate(newRotationMatrix, cameraAngle[0] * Math.PI, [1, 0, 0]);
 	mat4.rotate(newRotationMatrix, cameraAngle[1] * Math.PI, [0, 1, 0]);
 	mat4.rotate(newRotationMatrix, cameraAngle[2] * Math.PI, [0, 0, 1]);
-    
+
 	mat4.multiply(newRotationMatrix, Raytracer.RotationMatrix, Raytracer.RotationMatrix);
 };
 Raytracer.addLight = function( px, py, pz, cr, cg, cb, intensity, attenuate ) {
@@ -185,11 +186,11 @@ Raytracer.render = function( animated ) {
     if ( animated ) {
         this.setUniform('1i', 'frame', this.frame);
     }
-    console.log("frmaeChange");
+  // console.log("frmaeChange");
 	//rotation matrix
-    
+
     this.setUniform('Matrix4fv', 'uMVMatrix', false, this.RotationMatrix );
-    
+
     if (this.needsToDraw || animated) {
 	    this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
         this.needsToDraw = false;
