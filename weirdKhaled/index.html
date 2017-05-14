@@ -5,175 +5,73 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 
-
     <script src="libjs/three.min.js"></script>
-
-		<!-- <script src="vendor/three.js/Three.js"></script>
-		<script src="vendor/three.js/Detector.js"></script>
-		<script src="vendor/three.js/Stats.js"></script>
-
-		<script src="vendor/threex/THREEx.screenshot.js"></script>
-		<script src="vendor/threex/THREEx.FullScreen.js"></script>
-		<script src="vendor/threex/THREEx.WindowResize.js"></script>
-
-		<script src="vendor/threex.dragpancontrols.js"></script> -->
 
 		<link  href="css/main.css" rel="stylesheet"/>
 	</head>
-<body>
-	<!-- three.js container -->
-  <div id="container"></div>
-	<!-- info on screen display -->
-	<div id="info">
-		<div class="top">
-			<a href="http://learningthreejs.com/blog/2011/12/20/boilerplate-for-three-js/" target="_blank">LearningThree.js</a>
-			boiler plate for
-			<a href="https://github.com/mrdoob/three.js/" target="_blank">three.js</a>
-		</div>
-		<div class="bottom" id="inlineDoc" >
-			- <i>p</i> for screenshot
-		</div>
-	</div>
+	<body>
+	  <div id="container"></div>
 
-	<!-- Adapted from https://pxwise.github.io/2015/05/31/Getting-Started-with-THREE.js.html -->
-
-	<script id="vertexShader" type="x-shader/x-vertex">
-	uniform float time;
-	void main()	{
-		gl_Position = projectionMatrix *
-                modelViewMatrix *
-                vec4(position,1.0);
-	}
-</script>
-
-<script id="fragmentShader" type="x-shader/x-fragment">
-	uniform float time;
-	void main() {
-  gl_FragColor = vec4(1.0,  // R
-                      1.0,  // G
-                      1.0,  // B
-                      1.0); // A
-}
-</script>
-
-  <script>
-  (function() {
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
-    var renderer = new THREE.WebGLRenderer();
-    var geometry = new THREE.BoxGeometry(700, 700, 700, 10, 10, 10);
-    var startTime = Date.now();
-    uniforms = {
-			time: { type: "f", value: 1.0 },
-		};
-    var material = new THREE.ShaderMaterial( {
-			uniforms: uniforms,
-			vertexShader: document.getElementById( 'vertexShader' ).textContent,
-			fragmentShader: document.getElementById( 'fragmentShader' ).textContent
-		});
-    //var material = new THREE.MeshBasicMaterial({color: 0xfffff});
-
-    console.log(material)
-    var cube = new THREE.Mesh(geometry, material);
-
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-    scene.add(cube);
-    camera.position.z = 1000;
-
-    function render() {
-      requestAnimationFrame(render);
-      cube.rotation.x += 0.001;
-      cube.rotation.y += 0.001;
-      var elapsedMilliseconds = Date.now() - startTime;
-		var elapsedSeconds = elapsedMilliseconds / 1000.;
-		uniforms.time.value = 60. * elapsedSeconds;
-      renderer.render(scene, camera);
-    };
-
-    render();
-  }());
-  </script>
-
-	<!-- <script type="text/javascript">
-		var stats, scene, renderer;
-		var camera, cameraControl;
-
-
-		if( !init() )	animate();
-
-		// init the scene
-		function init(){
-
-			renderer = new THREE.CanvasRenderer();
-
-			renderer.setSize( window.innerWidth, window.innerHeight );
-			document.getElementById('container').appendChild(renderer.domElement);
-
-			// add Stats.js - https://github.com/mrdoob/stats.js
-			stats = new Stats();
-			stats.domElement.style.position	= 'absolute';
-			stats.domElement.style.bottom	= '0px';
-			document.body.appendChild( stats.domElement );
-
-			// create a scene
-			scene = new THREE.Scene();
-
-			// put a camera in the scene
-			camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 1, 10000 );
-			camera.position.set(0, 0, 5);
-			scene.add(camera);
-
-			// create a camera contol
-			cameraControls	= new THREEx.DragPanControls(camera)
-
-			// transparently support window resize
-			THREEx.WindowResize.bind(renderer, camera);
-			// allow 'p' to make screenshot
-			THREEx.Screenshot.bindKey(renderer);
-			// allow 'f' to go fullscreen where this feature is supported
-			if( THREEx.FullScreen.available() ){
-				THREEx.FullScreen.bindKey();
-				document.getElementById('inlineDoc').innerHTML	+= "- <i>f</i> for fullscreen";
+		<!-- Adapted from https://pxwise.github.io/2015/05/31/Getting-Started-with-THREE.js.html -->
+		<script id="vertexShader" type="x-shader/x-vertex">
+			uniform float time;
+			void main()	{
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
 			}
+		</script>
 
-			// here you add your objects
-			// - you will most likely replace this part by your own
-			var geometry	= new THREE.TorusGeometry( 1, 0.42 );
-			var material	= new THREE.MeshBasicMaterial({color: 0x00aaaa});
-			var mesh	= new THREE.Mesh( geometry, material );
-			scene.add( mesh );
+		<script id="fragmentShader" type="x-shader/x-fragment">
+			uniform float time;
+			void main() {
+		  	gl_FragColor = vec4(0.6, 1.0, 1.0, 0.5);
+			}
+		</script>
 
+	  <script>
+		  (function() {
+		    var scene 		= new THREE.Scene();
+		    var camera 		= new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+		    var renderer 	= new THREE.WebGLRenderer();
+		    var geometry 	= new THREE.BoxGeometry(700, 700, 700, 10, 10, 10);
+		    var startTime = Date.now();
 
-		}
+				var attributes = {};
 
-		// animation loop
-		function animate() {
+		    var uniforms 	 = {
+					time: { type: "f", value: 1.0 },
+				};
 
-			// loop on request animation loop
-			// - it has to be at the begining of the function
-			// - see details at http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
-			requestAnimationFrame( animate );
+		    var material = new THREE.ShaderMaterial( {
+					uniforms: 			uniforms,
+					attributes:     attributes,
+					vertexShader:   document.getElementById( 'vertexShader' ).textContent,
+					fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+					transparent: 		true
+				});
 
-			// do the render
-			render();
+		    //var material = new THREE.MeshBasicMaterial({color: 0xfffff});
 
-			// update stats
-			stats.update();
-		}
+		    console.log(material);
+		    var cube = new THREE.Mesh(geometry, material);
 
-		// render the scene
-		function render() {
+		    renderer.setSize(window.innerWidth, window.innerHeight);
+		    document.body.appendChild(renderer.domElement);
+		    scene.add(cube);
+		    camera.position.z = 1000;
 
-			// update camera controls
-			cameraControls.update();
+		    function render() {
+		      requestAnimationFrame(render);
+		      cube.rotation.x += 0.001;
+		      cube.rotation.y += 0.001;
+		      var elapsedMilliseconds = Date.now() - startTime;
+					var elapsedSeconds = elapsedMilliseconds / 1000.;
+					uniforms.time.value = 60. * elapsedSeconds;
+		      renderer.render(scene, camera);
+		    };
 
-			// actually render the scene
-			renderer.render( scene, camera );
-		}
-	</script> -->
+		    render();
+		  }());
+	  </script>
 
-
-
-</body>
+	</body>
 </html>
