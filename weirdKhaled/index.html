@@ -57,6 +57,8 @@
 				// inter-fur shadows
 				float shadow = mix( 0.0, hairColor.b, offset );
 
+				//if (hairColor.g > offset) { discard; }
+
 				gl_FragColor = vec4( color * patternColor.xyz * 2.0 * shadow, 1.1 - offset);
 			}
 		</script>
@@ -94,7 +96,7 @@
 
 					// geometry - currently torus
 					// can we make this an arbitrary mesh?
-					var geometry = new THREE.TorusGeometry( 50, 15, 16, 100 );  // torus
+					var geometry = new THREE.SphereGeometry( 60, 32, 32 );      // sphere
 					// var geometry = new THREE.ConeGeometry( 50, 200, 320 );      // cone
 					// var geometry = new THREE.BoxGeometry( 100, 100, 100 );      // box
 					// var geometry = new THREE.TorusGeometry( 50, 15, 16, 100 );  // torus
@@ -158,8 +160,8 @@
 
 						for (var i = 0; i < spheres.length; i++) {
 							// comment in below for geometry to rotate
-							spheres[i].rotation.x += 0.005;
-						  spheres[i].rotation.y += 0.005;
+							// spheres[i].rotation.x += 0.005;
+						  // spheres[i].rotation.y += 0.005;
 						}
 
 						renderer.render( scene, camera );
