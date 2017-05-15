@@ -8,6 +8,10 @@
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<script src="libjs/three.min.js"></script>
 	<script src="libjs/stats.min.js"></script>
+	<script src="libjs/dat.gui.js"></script>
+	<script src="js/gui.js"></script>
+	<script src="js/guiConfig.js"></script>
+	<script src="js/parser.js"></script>
 	<link  href="css/main.css" rel="stylesheet"/>
 </head>
 
@@ -18,12 +22,10 @@
 	<script id="vertexShader" type="x-shader/x-vertex">
 	uniform float offset;
 	uniform float time;
+	uniform float spacing;
 	uniform vec3 gravity;
 	varying vec2 vUv;
 	varying vec3 vNormal;
-
-
-	const float spacing = 12.0;
 
 	void main()	{
 		// determining (u,v) coordinates for fragment shader
@@ -89,6 +91,8 @@
 	<!-- Main structure adapted from https://threejs.org/examples/webgl_loader_json_claraio.html -->
 	<script>
 
+	Gui.init();
+	
 	var container;
 	var camera, scene, renderer;
 	var hairMap, colorMap;
@@ -138,10 +142,6 @@
 	// state variables
 	var startTime = Date.now();
 	var gravity = new THREE.Vector3(0,-0.75,0);
-
-
-	// number of shells, nested geometries
-	var numShells = 120;
 
 	// render each shell
 	for (var i = 0; i < numShells; i++) {
