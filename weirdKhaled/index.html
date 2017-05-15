@@ -1,0 +1,192 @@
+
+<!-- General structure for index.html adapted from https://pxwise.github.io/2015/05/31/Getting-Started-with-THREE.js.html , -->
+<!doctype html>
+<html>
+	<head>
+		<title>426 Final Project</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <script src="libjs/three.min.js"></script>
+		<script src="libjs/stats.min.js"></script>
+		<link  href="css/main.css" rel="stylesheet"/>
+	</head>
+
+	<body>
+		<!-- Shaders partially adapted from: http://www.catalinzima.com/xna/tutorials/fur-rendering/ -->
+
+		<!-- Vertex Shader -->
+		<script id="vertexShader" type="x-shader/x-vertex">
+			uniform float offset;
+			uniform float time;
+
+			varying vec2 vUv;
+			varying vec3 vNormal;
+
+			// determines distance between offsets, the greater the number the more blurry the fringes
+			const float spacing = 18.0;
+
+			void main()	{
+				// determining (u,v) coordinates for fragment shader
+				vUv = uv * 20.0;
+				vNormal = normalize( normal );
+				vec3 forceDirection = vec3(0.0, 0.0, 0.0);
+
+				forceDirection.x = sin(time+position.x*0.05) * 0.2;
+				forceDirection.y = cos(time*0.7+position.y*0.04) * 0.2;
+				forceDirection.z = sin(time*0.7+position.y*0.04) * 0.2;
+
+				// move vertex outwards depending on normal, offset, spaces
+				vec3 position = vec3( position.x, position.y, position.z ) + ( vNormal * offset * spacing );
+
+				//position + forceDirection;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+			}
+		</script>
+
+
+		<!-- Fragment Shader -->
+		<script id="fragmentShader" type="x-shader/x-fragment">
+
+			uniform sampler2D hairMap;
+			uniform sampler2D patternMap;
+			uniform vec3 color;
+			uniform float offset;
+
+			varying vec2 vUv;
+
+			void main() {
+
+				// hair map, location (r), length (g), and darkness (b)
+				vec4 hairColor 		= texture2D( hairMap, vec2(vUv.s, vUv.t) );
+
+				// pattern map
+				vec4 patternColor = texture2D( patternMap, vec2(vUv.s * 0.2, vUv.t * 0.2) );
+
+				// inter-fur shadows
+				float shadow = mix( 0.0, hairColor.b, offset );
+
+				//if (hairColor.g > offset) { discard; }
+
+				gl_FragColor = vec4( color * patternColor.xyz * 2.0 * shadow, 1.1 - offset);
+			}
+		</script>
+
+		<!-- Main -->
+		<!-- Main structure adapted from https://threejs.org/examples/webgl_loader_json_claraio.html -->
+	  <script>
+
+					var container;
+					var camera, scene, renderer;
+					var hairMap, colorMap;
+					var spheres = [];
+
+					// adding HTML element for the graphic
+					container = document.createElement( 'div' );
+					document.body.appendChild( container );
+
+					// initializing the scene
+					scene = new THREE.Scene();
+
+					// camera
+					camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+					camera.position.z = 150;
+					camera.lookAt(scene.position);
+					scene.add( camera );
+
+					// pattern, diffuse color
+					patternMap = THREE.ImageUtils.loadTexture( "images/grass.png" );
+					patternMap.wrapS = patternMap.wrapT = THREE.RepeatWrapping;
+
+					// hair, maps location (r), length (g), and darkness (b)
+					hairMap = new THREE.Texture( generateTexture() );
+					hairMap.needsUpdate = true;
+					hairMap.wrapS = hairMap.wrapT = THREE.RepeatWrapping;
+
+					// geometry - currently torus
+					// can we make this an arbitrary mesh?
+					var geometry = new THREE.SphereGeometry( 60, 32, 32 );      // sphere
+					// var geometry = new THREE.ConeGeometry( 50, 200, 320 );      // cone
+					// var geometry = new THREE.BoxGeometry( 100, 100, 100 );      // box
+					// var geometry = new THREE.TorusGeometry( 50, 15, 16, 100 );  // torus
+					// var geometry = new THREE.SphereGeometry( 60, 32, 32 );      // sphere
+
+					// renderer
+					renderer = new THREE.WebGLRenderer();
+					renderer.setSize( window.innerWidth, window.innerHeight );
+					container.appendChild( renderer.domElement );
+
+					// state variables
+    				var startTime = Date.now();
+
+					// number of shells, nested geometries
+					var numShells = 120;
+
+					// render each shell
+					for (var i = 0; i < numShells; i++) {
+
+						var uniforms = {
+							color:      { type: "c",  value: new THREE.Color( 0xffffff ) },
+							hairMap:    { type: "t",  value: hairMap},
+							patternMap: { type: "t",  value: patternMap },
+							offset:			{ type: "f",  value: i / numShells },
+							time: { type: "f", value: 400.0 },
+							// gravity: 		{ type: "v3", value: vec }
+						};
+
+						var material = new THREE.ShaderMaterial( {
+							uniforms: 			uniforms,
+							vertexShader:   document.getElementById( 'vertexShader' ).textContent,
+							fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+							transparent: 		true,
+							fog: 				true
+						});
+
+						// create mesh and add to scene as well as array of meshes
+						var sphere =  new THREE.Mesh( geometry, material );
+						scene.add( sphere );
+						spheres.push( sphere );
+					}
+
+					render();
+
+					// generate map for hair, map shows maps location (r), length (g), and darkness (b)
+					// adapted from http://oos.moxiecode.com/js_webgl/fur/
+					function generateTexture() {
+
+						var canvas = document.createElement( 'canvas' );
+						canvas.width = canvas.height = 256;
+
+						var context = canvas.getContext( '2d' );
+
+						for ( var i = 0; i < 10000; i++ ) {
+							context.fillStyle = "rgba( 255, " + Math.floor( Math.random() * 255 ) + ", " + Math.floor( Math.random() * 255 ) + " ,1 )";
+							context.fillRect( ( Math.random() * canvas.width ), ( Math.random() * canvas.height ), 2, 2 );
+						}
+
+						return canvas;
+					}
+
+					function updateTime() {
+						var elapsedMilliseconds = Date.now() - startTime;
+						var elapsedSeconds = elapsedMilliseconds / 1000.;
+						uniforms.time.value = Math.sin(60. * elapsedSeconds);
+					}
+
+					function render() {
+						requestAnimationFrame( render );
+						console.log("HFGDS")
+						for (var i = 0; i < spheres.length; i++) {
+							// comment in below for geometry to rotate
+							// spheres[i].rotation.x += 0.005;
+						 //  spheres[i].rotation.y += 0.005;
+						}
+						updateTime();
+						
+						
+
+						renderer.render( scene, camera );
+					}
+
+	  </script>
+	</body>
+</html>
