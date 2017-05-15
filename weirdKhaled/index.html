@@ -21,7 +21,7 @@
 			varying vec2 vUv;
 			varying vec3 vNormal;
 
-			// determines distance between offsets, the greater the numer the more blurry the edges
+			// determines distance between offsets, the greater the number the more blurry the fringes
 			const float spacing = 18.0;
 
 			void main()	{
@@ -84,7 +84,7 @@
 					scene.add( camera );
 
 					// pattern, diffuse color
-					patternMap = THREE.ImageUtils.loadTexture( "images/tiger-fur-2.jpg" );
+					patternMap = THREE.ImageUtils.loadTexture( "images/grass.png" );
 					patternMap.wrapS = patternMap.wrapT = THREE.RepeatWrapping;
 
 					// hair, maps location (r), length (g), and darkness (b)
@@ -92,9 +92,13 @@
 					hairMap.needsUpdate = true;
 					hairMap.wrapS = hairMap.wrapT = THREE.RepeatWrapping;
 
-					// geometry - currently sphere
+					// geometry - currently torus
 					// can we make this an arbitrary mesh?
-					var geometry = new THREE.SphereGeometry( 60, 32, 32 );
+					var geometry = new THREE.TorusGeometry( 50, 15, 16, 100 );  // torus
+					// var geometry = new THREE.ConeGeometry( 50, 200, 320 );      // cone
+					// var geometry = new THREE.BoxGeometry( 100, 100, 100 );      // box
+					// var geometry = new THREE.TorusGeometry( 50, 15, 16, 100 );  // torus
+					// var geometry = new THREE.SphereGeometry( 60, 32, 32 );      // sphere
 
 					// renderer
 					renderer = new THREE.WebGLRenderer();
@@ -108,10 +112,11 @@
 					for (var i = 0; i < numShells; i++) {
 
 						var uniforms = {
-							color:      { type: "c", value: new THREE.Color( 0xffffff ) },
-							hairMap:    { type: "t", value: hairMap},
-							patternMap: { type: "t", value: patternMap },
-							offset:			{ type: "f", value: i / numShells },
+							color:      { type: "c",  value: new THREE.Color( 0xffffff ) },
+							hairMap:    { type: "t",  value: hairMap},
+							patternMap: { type: "t",  value: patternMap },
+							offset:			{ type: "f",  value: i / numShells },
+							// gravity: 		{ type: "v3", value: vec }
 						};
 
 						var material = new THREE.ShaderMaterial( {
@@ -140,7 +145,7 @@
 						var context = canvas.getContext( '2d' );
 
 						for ( var i = 0; i < 10000; i++ ) {
-							context.fillStyle = "rgba( 255, 255, " + Math.floor( Math.random() * 255 ) + " ,1 )";
+							context.fillStyle = "rgba( 255, " + Math.floor( Math.random() * 255 ) + ", " + Math.floor( Math.random() * 255 ) + " ,1 )";
 							context.fillRect( ( Math.random() * canvas.width ), ( Math.random() * canvas.height ), 2, 2 );
 						}
 
