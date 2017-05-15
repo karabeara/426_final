@@ -18,14 +18,13 @@
 		<script id="vertexShader" type="x-shader/x-vertex">
 			uniform float offset;
 			uniform float time;
+			uniform float spacing;
 
 			varying vec2 vUv;
 			varying vec3 vNormal;
 
-			// determines distance between offsets, the greater the number the more blurry the fringes
-			const float spacing = 14.0;
-
 			void main()	{
+								
 				// determining (u,v) coordinates for fragment shader
 				vUv = uv * 20.0;
 				vNormal = normalize( normal );
@@ -81,6 +80,10 @@
 					var camera, scene, renderer;
 					var hairMap, colorMap;
 					var spheres = [];
+					
+					var height = 1200.0;
+					var spacing = 12.0;
+					var numShells = height/spacing;
 
 					// state variables
     			var startTime = Date.now();
@@ -136,9 +139,6 @@
 						// scale up mesh
 						// geometry.applyMatrix( new THREE.Matrix4().scale( new THREE.Vector3( 30, 30, 30 ) ) );
 
-						// number of shells, nested geometries
-						var numShells = 120;
-
 						// render each shell
 						for (var i = 0; i < numShells; i++) {
 
@@ -147,6 +147,7 @@
 								hairMap:    { type: "t",  value: hairMap},
 								patternMap: { type: "t",  value: patternMap },
 								offset:			{ type: "f",  value: i / numShells },
+								spacing:	{ type: "f", value : spacing },
 								// time:       { type: "f", value: 400.0 },
 								// gravity: 		{ type: "v3", value: vec }
 							};
