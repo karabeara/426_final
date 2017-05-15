@@ -2,210 +2,260 @@
 <!-- General structure for index.html adapted from https://pxwise.github.io/2015/05/31/Getting-Started-with-THREE.js.html , -->
 <!doctype html>
 <html>
-	<head>
-		<title>426 Final Project</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<head>
+<title>426 Final Project</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <script src="libjs/three.min.js"></script>
-		<script src="libjs/stats.min.js"></script>
-		<link  href="css/main.css" rel="stylesheet"/>
-	</head>
+<script src="libjs/stats.min.js"></script>
+<link  href="css/main.css" rel="stylesheet"/>
+</head>
 
-	<body>
-		<!-- Shaders partially adapted from: http://www.catalinzima.com/xna/tutorials/fur-rendering/ -->
+<body>
+<!-- Shaders partially adapted from: http://www.catalinzima.com/xna/tutorials/fur-rendering/ -->
 
-		<!-- Vertex Shader -->
-		<script id="vertexShader" type="x-shader/x-vertex">
-				uniform float offset;
-			uniform float time;
-			uniform vec3 gravity;
-
-			varying vec2 vUv;
-			varying vec3 vNormal;
-
-			const float spacing = 12.0;
-
-			void main() {
-
-				vec3 displacement = vec3(0.0,0.0,0.0);
-				vec3 forceDirection = vec3(0.0,0.0,0.0);
-
-				// "wind"
-				forceDirection.x = sin(time*0.05) * 0.2;
-				forceDirection.y = cos(time*0.7*0.04) * 0.2;
-				forceDirection.z = sin(time*0.7*0.04) * 0.2;
-
-				// "gravity"
-				displacement = gravity + forceDirection;
-
-				float displacementFactor = pow(offset, 3.0);
-
-				vec3 aNormal = normal;
-				aNormal.xyz += displacement*displacementFactor;
-
-				// move outwards depending on offset(layer) and normal+force+gravity
-				vec3 animated = vec3( position.x, position.y, position.z )+(normalize(aNormal)*offset*spacing);
-
-				vNormal = normalize(normal*aNormal);
-
-				vUv = uv*20.0;
-
-				vec4 mvPosition = modelViewMatrix * vec4( animated, 1.0 );
-
-				gl_Position = projectionMatrix * mvPosition;
-			}
-		</script>
+<!-- Vertex Shader -->
+<script id="vertexShader" type="x-shader/x-vertex">
+uniform float offset;
+uniform float time;
+uniform vec3 gravity;
+varying vec2 vUv;
+varying vec3 vNormal;
 
 
-		<!-- Fragment Shader -->
-		<script id="fragmentShader" type="x-shader/x-fragment">
+const float spacing = 12.0;
 
-			uniform sampler2D hairMap;
-			uniform sampler2D patternMap;
-			uniform vec3 color;
-			uniform float offset;
+void main()	{
+// determining (u,v) coordinates for fragment shader
+vUv = uv * 20.0;
+//vNormal = normalize( normal );
+vec3 forceDirection = vec3(0.0, 0.0, 0.0);
+vec3 displacement = vec3(0.0,0.0,0.0);
+forceDirection.x = sin(time+position.x*0.05) * 0.2;
+forceDirection.y = cos(time*0.7+position.y*0.04) * 0.2;
+forceDirection.z = sin(time*0.7+position.y*0.04) * 0.2;
 
-			varying vec2 vUv;
+displacement = gravity + forceDirection;
+float displacementFactor = pow(offset, 3.0);
+displacement = displacement * displacementFactor;
 
-			void main() {
+vec3 furNormal = normalize(normal);
+furNormal.xyz += displacement;
 
-				// hair map, location (r), length (g), and darkness (b)
-				vec4 hairColor 		= texture2D( hairMap, vec2(vUv.s, vUv.t) );
+// move outwards depending on offset(layer) and normal+force+gravity
+vec3 animated = vec3(position.x, position.y, position.z)+(normalize(furNormal)*offset*spacing);
 
-				// pattern map
-				vec4 patternColor = texture2D( patternMap, vec2(vUv.s * 0.2, vUv.t * 0.2) );
+vNormal = normalize(normal*furNormal);
 
-				// inter-fur shadows
-				float shadow = mix( 0.0, hairColor.b, offset );
+//vUv = uv*20.0;
 
-				if (hairColor.g < offset) { discard; }
+vec4 mvPosition = modelViewMatrix * vec4( animated, 1.0 );
 
-				gl_FragColor = vec4( color * patternColor.xyz * 2.0 * shadow, 1.1 - offset);
-			}
-		</script>
-
-		<!-- Main -->
-		<!-- Main structure adapted from https://threejs.org/examples/webgl_loader_json_claraio.html -->
-	  <script>
-
-					var container;
-					var camera, scene, renderer;
-					var hairMap, colorMap;
-					var spheres = [];
-
-					// adding HTML element for the graphic
-					container = document.createElement( 'div' );
-					document.body.appendChild( container );
-
-					// initializing the scene
-					scene = new THREE.Scene();
-
-					// camera
-					camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
-					camera.position.z = 150;
-					camera.lookAt(scene.position);
-					scene.add( camera );
-
-					// pattern, diffuse color
-					patternMap = THREE.ImageUtils.loadTexture( "images/tiger-fur-2.jpg" );
-					patternMap.wrapS = patternMap.wrapT = THREE.RepeatWrapping;
-
-					// hair, maps location (r), length (g), and darkness (b)
-					hairMap = new THREE.Texture( generateTexture() );
-					hairMap.needsUpdate = true;
-					hairMap.wrapS = hairMap.wrapT = THREE.RepeatWrapping;
-
-					// geometry - currently torus
-					// can we make this an arbitrary mesh?
-					var geometry = new THREE.SphereGeometry( 60, 32, 32 );      // sphere
-					// var geometry = new THREE.ConeGeometry( 50, 200, 320 );      // cone
-					// var geometry = new THREE.BoxGeometry( 100, 100, 100 );      // box
-					// var geometry = new THREE.TorusGeometry( 50, 15, 16, 100 );  // torus
-					// var geometry = new THREE.SphereGeometry( 60, 32, 32 );      // sphere
-
-					// renderer
-					renderer = new THREE.WebGLRenderer();
-					renderer.setSize( window.innerWidth, window.innerHeight );
-					container.appendChild( renderer.domElement );
-
-					// state variables
-    				var startTime = Date.now();
-    				var gravity = new THREE.Vector3(0,-0.75,0);
+gl_Position = projectionMatrix * mvPosition;
+}
+</script>
 
 
-					// number of shells, nested geometries
-					var numShells = 120;
+<!-- Fragment Shader -->
+<!-- Discarding fragment: https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/discard.php -->
+<script id="fragmentShader" type="x-shader/x-fragment">
 
-					// render each shell
-					for (var i = 0; i < numShells; i++) {
+uniform sampler2D hairMap;
+uniform sampler2D patternMap;
+uniform vec3 color;
+uniform float offset;
 
-						var uniforms = {
-							color:      { type: "c",  value: new THREE.Color( 0xffffff ) },
-							hairMap:    { type: "t",  value: hairMap},
-							patternMap: { type: "t",  value: patternMap },
-							offset:			{ type: "f",  value: i / numShells },
-							time: { type: "f", value: 1.0 },
-							gravity: 		{ type: "v3", value: gravity }
-						};
+varying vec2 vUv;
 
-						var material = new THREE.ShaderMaterial( {
-							uniforms: 			uniforms,
-							vertexShader:   document.getElementById( 'vertexShader' ).textContent,
-							fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
-							transparent: 		true,
-							fog: 						true
-						});
+void main() {
 
-						// create mesh and add to scene as well as array of meshes
-						var sphere =  new THREE.Mesh( geometry, material );
-						scene.add( sphere );
-						spheres.push( sphere );
-					}
+// hair map, location (r), length (g), and darkness (b)
+vec4 hairColor = texture2D( hairMap, vec2(vUv.s, vUv.t) );
 
-					render();
+// pattern map
+vec4 patternColor = texture2D( patternMap, vec2(vUv.s * 0.2, vUv.t * 0.2) );
 
-					// generate map for hair, map shows maps location (r), length (g), and darkness (b)
-					// adapted from http://oos.moxiecode.com/js_webgl/fur/
-					function generateTexture() {
+// inter-fur shadows
+float shadow = mix( 0.5, hairColor.b, offset );
+// float shadow = 1.0;
 
-						var canvas = document.createElement( 'canvas' );
-						canvas.width = canvas.height = 256;
+if (hairColor.g < offset) { discard; }
 
-						var context = canvas.getContext( '2d' );
+gl_FragColor = vec4( color * patternColor.xyz * 2.0 * shadow, 1.1 - offset);
+}
+</script>
 
-						for ( var i = 0; i < 10000; i++ ) {
-							context.fillStyle = "rgba( 255, " + Math.floor( Math.random() * 255 ) + ", " + Math.floor( Math.random() * 255 ) + " ,1 )";
-							context.fillRect( ( Math.random() * canvas.width ), ( Math.random() * canvas.height ), 2, 2 );
-						}
+<!-- Main -->
+<!-- Main structure adapted from https://threejs.org/examples/webgl_loader_json_claraio.html -->
+ <script>
 
-						return canvas;
-					}
+var container;
+var camera, scene, renderer;
+var hairMap, colorMap;
+var spheres = [];
+var height = 1200.0;
+var spacing = 12.0;
+var numShells = height/spacing;
 
-					function getUpdatedTime() {
-						var elapsedMilliseconds = Date.now() - startTime;
-						var elapsedSeconds = elapsedMilliseconds / 1000.;
-						return (6 * elapsedSeconds);
-					//console.log(uniforms.time.value)
+// state variables
+    var startTime = Date.now();
 
-						return;
-					}
+// adding HTML element for the graphic
+container = document.createElement( 'div' );
+document.body.appendChild( container );
 
-					function render() {
-						requestAnimationFrame( render );
+// initializing the scene
+scene = new THREE.Scene();
 
-						for (var i = 0; i < spheres.length; i++) {
-							// comment in below for geometry to rotate
-							// spheres[i].rotation.x += 0.005;
-						 //  spheres[i].rotation.y += 0.005;
-						 var newTime =getUpdatedTime();
-						 spheres[i].material.uniforms.time.value = newTime;
+// camera
+camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+camera.position.z = 150;
+camera.lookAt(scene.position);
+scene.add( camera );
 
-						}
-						
+// pattern, diffuse color
+patternMap = THREE.ImageUtils.loadTexture( "images/tiger-fur-2.jpg" );
 
-						renderer.render( scene, camera );
-					}
+patternMap.wrapS = patternMap.wrapT = THREE.RepeatWrapping;
 
-	  </script>
-	</body>
+// hair, maps location (r), length (g), and darkness (b)
+hairMap = new THREE.Texture( generateTexture() );
+hairMap.needsUpdate = true;
+hairMap.wrapS = hairMap.wrapT = THREE.RepeatWrapping;
+
+// geometry - currently torus
+// can we make this an arbitrary mesh?
+// var geometry = new THREE.ConeGeometry( 50, 200, 320 );      // cone
+// var geometry = new THREE.BoxGeometry( 100, 100, 100 );      // box
+// var geometry = new THREE.TorusGeometry( 50, 15, 16, 100 );  // torus
+var geometry = new THREE.SphereGeometry( 60, 32, 32 );      // sphere
+
+// renderer
+renderer = new THREE.WebGLRenderer();
+renderer.setSize( window.innerWidth, window.innerHeight );
+container.appendChild( renderer.domElement );
+
+// state variables
+    var startTime = Date.now();
+    var gravity = new THREE.Vector3(0,-0.75,0);
+
+
+// number of shells, nested geometries
+var numShells = 120;
+
+// render each shell
+for (var i = 0; i < numShells; i++) {
+
+var uniforms = {
+color:      { type: "c",  value: new THREE.Color( 0xffffff ) },
+hairMap:    { type: "t",  value: hairMap},
+patternMap: { type: "t",  value: patternMap },
+offset:	{ type: "f",  value: i / numShells },
+time: { type: "f", value: 1.0 },
+gravity: { type: "v3", value: gravity }
+};
+
+var material = new THREE.ShaderMaterial( {
+uniforms: uniforms,
+vertexShader:   document.getElementById( 'vertexShader' ).textContent,
+fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+transparent: true,
+fog: true
+});
+
+// create mesh and add to scene as well as array of meshes
+var sphere =  new THREE.Mesh( geometry, material );
+scene.add( sphere );
+spheres.push( sphere );
+}
+// Import mesh from JSON in objects folder
+// Adapted from http://stackoverflow.com/questions/15887736/how-to-convert-object-to-json-file-for-three-js-model-loader
+// var loader = new THREE.JSONLoader();
+// loader.load("objects/cylinder.js", addMeshToScene);
+addMeshToScene(geometry);
+
+// // renderer
+// renderer = new THREE.WebGLRenderer();
+// renderer.setSize( window.innerWidth, window.innerHeight );
+// container.appendChild( renderer.domElement );
+
+
+render();
+
+function addMeshToScene( geometry ) {
+// scale up mesh
+// geometry.applyMatrix( new THREE.Matrix4().scale( new THREE.Vector3( 30, 30, 30 ) ) );
+
+// render each shell
+for (var i = 0; i < numShells; i++) {
+
+var uniforms = {
+time: { type: "f", value: 1.0 },
+color:      { type: "c",  value: new THREE.Color( 0xffffff ) },
+hairMap:    { type: "t",  value: hairMap},
+patternMap: { type: "t",  value: patternMap },
+offset:	{ type: "f",  value: i / numShells },
+spacing:	{ type: "f", value : spacing },
+// time:       { type: "f", value: 400.0 },
+// gravity: { type: "v3", value: vec }
+};
+
+var material = new THREE.ShaderMaterial( {
+uniforms: uniforms,
+vertexShader:   document.getElementById( 'vertexShader' ).textContent,
+fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+transparent: true,
+fog:    true
+});
+
+// create mesh and add to scene as well as array of meshes
+var sphere =  new THREE.Mesh( geometry, material );
+scene.add( sphere );
+spheres.push( sphere );
+}
+}
+
+// generate map for hair, map shows maps location (r), length (g), and darkness (b)
+// adapted from http://oos.moxiecode.com/js_webgl/fur/
+function generateTexture() {
+
+var canvas = document.createElement( 'canvas' );
+canvas.width = canvas.height = 256;
+
+var context = canvas.getContext( '2d' );
+
+for ( var i = 0; i < 10000; i++ ) {
+context.fillStyle = "rgba( 255, " + Math.floor( Math.random() * 255 ) + ", " + Math.floor( Math.random() * 255 ) + " ,1 )";
+context.fillRect( ( Math.random() * canvas.width ), ( Math.random() * canvas.height ), 2, 2 );
+}
+
+return canvas;
+}
+
+function getUpdatedTime() {
+var elapsedMilliseconds = Date.now() - startTime;
+var elapsedSeconds = elapsedMilliseconds / 1000.;
+return (6 * elapsedSeconds);
+//console.log(uniforms.time.value)
+
+return;
+
+}
+
+function render() {
+requestAnimationFrame( render );
+
+for (var i = 0; i < spheres.length; i++) {
+// comment in below for geometry to rotate
+spheres[i].rotation.x += 0.005;
+ spheres[i].rotation.y += 0.005;
+var newTime =getUpdatedTime();
+spheres[i].material.uniforms.time.value = newTime;
+
+}
+renderer.render( scene, camera );
+}
+
+ </script>
+</body>
 </html>
