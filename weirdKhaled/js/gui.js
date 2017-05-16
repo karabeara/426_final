@@ -71,7 +71,7 @@ Gui.handleControlsChange = function() {
         break;
       case "Scale":
 		clearScene();
-		generateScene();
+		generateScene(converted_val, 30);
       //  Reflection.ambient = converted_val;
         break;
       case "Gravity":
