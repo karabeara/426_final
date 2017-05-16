@@ -92,7 +92,7 @@
 			var hairMap, colorMap;
 			var spheres = [];
 			var height = 200.0;
-			var spacing = 1.25;
+			var spacing = 2;
 			var numShells = Math.floor( height / spacing );
 
 			// state variables
@@ -109,7 +109,8 @@
 
 			// camera
 			camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
-			camera.position.z = 4;
+			camera.position.y = 40;
+			camera.position.z = 30;
 			camera.lookAt(scene.position);
 			scene.add( camera );
 
@@ -137,7 +138,7 @@
 			// ≥Import mesh from JSON in objects folder
 			// Adapted from http://stackoverflow.com/questions/15887736/how-to-convert-object-to-json-file-for-three-js-model-loader
 			var loader = new THREE.JSONLoader();
-			loader.load("objects/gem.js", addMeshToScene);
+			loader.load("objects/sheep.js", addMeshToScene);
 			// addMeshToScene( geometry );
 
 			render();
@@ -202,7 +203,7 @@
 				requestAnimationFrame( render );
 				for (var i = 0; i < spheres.length; i++) {
 					// comment in next two lines for geometry to rotate
-					spheres[i].rotation.x += 0.005;
+					// spheres[i].rotation.x += 0.005;
 					spheres[i].rotation.y += 0.005;
 
 					var newTime = getUpdatedTime();
