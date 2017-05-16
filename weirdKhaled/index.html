@@ -85,7 +85,6 @@
 		<!-- Main structure adapted from https://threejs.org/examples/webgl_loader_json_claraio.html -->
 		<script>
 
-			Gui.init();
 
 			var container;
 			var camera, scene, renderer;
@@ -142,6 +141,8 @@
 			// addMeshToScene( geometry );
 
 			render();
+			
+			Gui.init();
 
 			function addMeshToScene( geometry ) {
 				// scale up mesh
@@ -212,6 +213,15 @@
 				renderer.render( scene, camera );
 			}
 
+			function clearScene() {
+				while (scene.children.length > 0) {
+					scene.remove(scene.children[scene.children.length - 1]);
+				}
+			}
+
+			function generateScene() {
+			}
+			
 		</script>
 
 	</body>
