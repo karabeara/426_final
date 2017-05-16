@@ -110,7 +110,7 @@
 			generateScene(height, numShells, "sheep.js");
 			Gui.init();
 			
-			function generateScene(length, nShells, js_object) {
+			function generateScene(length, nShells, js_object, texture_image) {
 			
 				height = length;
 				numShells = nShells;
@@ -123,7 +123,7 @@
 				scene.add( camera );
 
 				// pattern, diffuse color
-				patternMap = THREE.ImageUtils.loadTexture( "images/tiger-fur-3.jpg" );
+				patternMap = THREE.ImageUtils.loadTexture( "images/" + texture_image); //tiger-fur-3.jpg");
 
 				patternMap.wrapS = patternMap.wrapT = THREE.RepeatWrapping;
 

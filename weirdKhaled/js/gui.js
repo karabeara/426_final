@@ -5,6 +5,8 @@ var Gui = Gui || {
   controlParamsStruct: {},
 };
 
+var current_js_object = "sheep.js"
+var current_fur_len = 2.0;
 
 Gui.init = function() {
 
@@ -55,17 +57,20 @@ Gui.init = function() {
 //height, numShells, fileName
 Gui.pushSheep = function(newMesh) {
   clearScene();
-  generateScene(2, 30, "sheep.js");
-};
-
-Gui.pushSheepLong = function(newMesh) {
-  clearScene();
-  generateScene(3, 30, "sheep.js");
+  current_js_object = "sheep.js"
+  generateScene(current_fur_len, 30, "sheep.js", "tiger-fur-3.jpg");
 };
 
 Gui.pushDiablo = function(newMesh) {
+  current_js_object = "diablo.js"
   clearScene();
-  generateScene(1.5, 30, "diablo.js");
+  generateScene(current_fur_len, 30, "diablo.js", "tiger-fur-3.jpg");
+};
+
+Gui.pushHand = function(newMesh) {
+  clearScene();
+  current_js_object = "hand.js"
+  generateScene(current_fur_len, 30, "hand.js", "tiger-fur-3.jpg");
 };
 
 
@@ -75,17 +80,15 @@ Gui.handleControlsChange = function() {
   for (var controlIdx = 0; controlIdx < GuiConfig.controlDefs.length; controlIdx++) {
     var controlDef = GuiConfig.controlDefs[controlIdx];
     var val = Gui.controlParamsStruct[controlDef.name];
-    var converted_val = val;
-
 
     switch (controlDef.name) {
       case "Fur Length":
+		clearScene();
+	    current_fur_len = val;
+		generateScene(current_fur_len, 30, current_js_object, "tiger-fur-3.jpg");
 		//height = converted_val;
         break;
       case "Scale":
-		clearScene();
-	//	generateScene(converted_val, 30, "sheep.js");
-      //  Reflection.ambient = converted_val;
         break;
       case "Gravity":
       //  Reflection.diffuse = converted_val;

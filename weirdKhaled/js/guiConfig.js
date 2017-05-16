@@ -4,16 +4,18 @@ var GuiConfig = GuiConfig || {
 
 };
 
-GuiConfig.meshFileNames = [
-	'sheep.js',
-	'diablo.js',
-];
-
 GuiConfig.controlDefs = [{
-    name: "Fur Length",
+    name: "This is covered up",
     type: "slider",
     sliderRange: [0, 20],
     defaultVal: 5,
+  },
+  
+  {
+    name: "Fur Length",
+    type: "slider",
+    sliderRange: [0, 10],
+    defaultVal: 2,
   },
 
   {
@@ -22,18 +24,18 @@ GuiConfig.controlDefs = [{
     defaultVal: Gui.pushSheep,
     isButton: true,
   },
-  
-   {
-    name: "Sheep with long fur",
-    type: "button",
-    defaultVal: Gui.pushSheepLong,
-    isButton: true,
-  },
-  
+   
   {
     name: "Diablo",
     type: "button",
     defaultVal: Gui.pushDiablo,
+    isButton: true,
+  },
+  
+  {
+    name: "Hand",
+    type: "button",
+    defaultVal: Gui.pushHand,
     isButton: true,
   },
 ];
