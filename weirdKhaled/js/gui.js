@@ -1,3 +1,4 @@
+// Adapted from Assignment 3b
 "use strict";
 
 
@@ -5,8 +6,16 @@ var Gui = Gui || {
   controlParamsStruct: {},
 };
 
-var current_js_object = "sheep.js"
+var cam_x = 0;
+var cam_y = 40;
+var cam_z = 30;
+var current_js_object = new THREE.SphereGeometry( 20, 32, 32 );
+var current_shells = 120;
 var current_fur_len = 2.0;
+var current_fur_tex = "jaguar.jpg";
+var isThreeGeometry = true;
+
+var isTorus = false;
 
 Gui.init = function() {
 
@@ -53,26 +62,55 @@ Gui.init = function() {
   this.fullyInitialized = true;
 };
 
+Gui.pushSphere = function(newMesh) {
+  clearScene();
+  cam_x = 0;
+  cam_y = 40;
+  cam_z = 30;
+  current_js_object = new THREE.SphereGeometry( 20, 32, 32 );
+  current_shells = 120;
+  isThreeGeometry = true;
+  isTorus = false;
+  generateScene( cam_x, cam_y, cam_z, current_fur_len, current_shells, current_js_object, current_fur_tex, isThreeGeometry );
+};
 
-//height, numShells, fileName
+Gui.pushTorus = function(newMesh) {
+  clearScene();
+  cam_x = 0;
+  cam_y = 2;
+  cam_z = 8;
+  current_fur_len = Math.floor(current_fur_len / 2);
+  current_shells = 120;
+  current_js_object = new THREE.TorusGeometry( 1, 0.25, 16, 100 );
+  isThreeGeometry = true;
+  isTorus = true;
+  generateScene( cam_x, cam_y, cam_z, current_fur_len, current_shells, current_js_object, current_fur_tex, isThreeGeometry );
+};
+
 Gui.pushSheep = function(newMesh) {
   clearScene();
-  current_js_object = "sheep.js"
-  generateScene(current_fur_len, 30, "sheep.js", "tiger-fur-3.jpg");
+  cam_x = 50;
+  cam_y = 50;
+  cam_z = 50;
+  current_shells = 35;
+  current_js_object = "objects/sheep.js";
+  isThreeGeometry = false;
+  isTorus = false;
+  generateScene( cam_x, cam_y, cam_z, current_fur_len, current_shells, "objects/sheep.js", current_fur_tex, isThreeGeometry );
 };
 
 Gui.pushDiablo = function(newMesh) {
-  current_js_object = "diablo.js"
   clearScene();
-  generateScene(current_fur_len, 30, "diablo.js", "tiger-fur-3.jpg");
+  cam_x = 4;
+  cam_y = 4;
+  cam_z = 2;
+  current_fur_len = Math.floor( current_fur_len / 2 );
+  current_shells = 30;
+  current_js_object = "objects/diablo.js";
+  isThreeGeometry = false;
+  isTorus = false;
+  generateScene( cam_x, cam_y, cam_z, current_fur_len, current_shells, "objects/diablo.js", current_fur_tex, isThreeGeometry );
 };
-
-Gui.pushHand = function(newMesh) {
-  clearScene();
-  current_js_object = "hand.js"
-  generateScene(current_fur_len, 30, "hand.js", "tiger-fur-3.jpg");
-};
-
 
 Gui.handleControlsChange = function() {
   if (Gui.suspendDisplayUpdate) return;
@@ -83,12 +121,30 @@ Gui.handleControlsChange = function() {
 
     switch (controlDef.name) {
       case "Fur Length":
-		clearScene();
-	    current_fur_len = val;
-		generateScene(current_fur_len, 30, current_js_object, "tiger-fur-3.jpg");
-		//height = converted_val;
+		    clearScene();
+        if (current_js_object === "objects/diablo.js") {
+          current_fur_len = Math.floor( val / 2 );
+        }
+        else if ( isTorus ) {
+          current_fur_len = Math.floor( val / 2 );
+        }
+        else {
+          current_fur_len = val;
+        }
+	      // current_fur_len = val;
+		    generateScene( cam_x, cam_y, cam_z, current_fur_len, current_shells, current_js_object, current_fur_tex, isThreeGeometry );
         break;
-      case "Scale":
+      case "Fur Texture":
+        clearScene();
+        if (current_js_object === "objects/diablo.js") {
+          current_fur_len = Math.floor( current_fur_len / 5 );
+        }
+        else if ( isTorus ) {
+          current_fur_len = Math.floor( current_fur_len );
+        }
+        current_fur_tex = val;
+
+        generateScene( cam_x, cam_y, cam_z, current_fur_len, current_shells, current_js_object, val, isThreeGeometry );
         break;
       case "Gravity":
       //  Reflection.diffuse = converted_val;
@@ -127,40 +183,6 @@ Gui.parseUrl = function() {
 
 Gui.getUrl = function() {
   var url = "";
-/*
-  // camera pose
-  url += "Camera=";
-  url += "[" + stripFloatError(Renderer.cameraPosition.x) + "," + stripFloatError(Renderer.cameraPosition.y) + "," + stripFloatError(Renderer.cameraPosition.z) + "];";
-  url += "[" + stripFloatError(Renderer.cameraUpVector.x) + "," + stripFloatError(Renderer.cameraUpVector.y) + "," + stripFloatError(Renderer.cameraUpVector.z) + "];";
-  url += "[" + stripFloatError(Renderer.cameraLookAtVector.x) + "," + stripFloatError(Renderer.cameraLookAtVector.y) + "," + stripFloatError(Renderer.cameraLookAtVector.z) + "]";
-
-
-  for (var meshIdx = 0; meshIdx < this.meshList.length; meshIdx++) {
-    var thisMesh = this.meshList[meshIdx];
-    url += "&" + "Mesh=" + thisMesh.meshName + ";" + (thisMesh.useMaterial ? "true" : "false");
-  }
-
-  for (var controlIdx = 0; controlIdx < GuiConfig.controlDefs.length; controlIdx++) {
-    var controlDef = GuiConfig.controlDefs[controlIdx];
-    if (controlDef.type == "button") {
-      continue;
-    }
-    url += "&" + controlDef.name + "=";
-    var val = this.controlParamsStruct[controlDef.name];
-
-    if (val.constructor === Array) {
-      url += "[";
-      for (var j = 0; j < val.length; j++) {
-        url += (j > 0 && "," || "") + stripFloatError(val[j]);
-      }
-      url += "]";
-    } else {
-      url += val;
-    }
-  }
-
-  url = url.replace(/ /g, "_");
-*/
   return url;
 };
 
