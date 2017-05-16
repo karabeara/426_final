@@ -51,8 +51,21 @@ Gui.init = function() {
   this.fullyInitialized = true;
 };
 
-Gui.pushMesh = function(newMesh) {
-  
+
+//height, numShells, fileName
+Gui.pushSheep = function(newMesh) {
+  clearScene();
+  generateScene(2, 30, "sheep.js");
+};
+
+Gui.pushSheepLong = function(newMesh) {
+  clearScene();
+  generateScene(3, 30, "sheep.js");
+};
+
+Gui.pushDiablo = function(newMesh) {
+  clearScene();
+  generateScene(1.5, 30, "diablo.js");
 };
 
 
@@ -71,7 +84,7 @@ Gui.handleControlsChange = function() {
         break;
       case "Scale":
 		clearScene();
-		generateScene(converted_val, 30);
+	//	generateScene(converted_val, 30, "sheep.js");
       //  Reflection.ambient = converted_val;
         break;
       case "Gravity":

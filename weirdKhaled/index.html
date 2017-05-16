@@ -107,10 +107,10 @@
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			container.appendChild( renderer.domElement );
 			
-			generateScene(height, numShells);
+			generateScene(height, numShells, "sheep.js");
 			Gui.init();
 			
-			function generateScene(length, nShells) {
+			function generateScene(length, nShells, js_object) {
 			
 				height = length;
 				numShells = nShells;
@@ -141,7 +141,7 @@
 				// ≥Import mesh from JSON in objects folder
 				// Adapted from http://stackoverflow.com/questions/15887736/how-to-convert-object-to-json-file-for-three-js-model-loader
 				var loader = new THREE.JSONLoader();
-				loader.load("objects/sheep.js", addMeshToScene);
+				loader.load("objects/" + js_object, addMeshToScene);
 				// addMeshToScene( geometry );
 
 				render();
